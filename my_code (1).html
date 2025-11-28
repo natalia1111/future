@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Симулятор адаптации культур к климату Беларуси (2025–2040)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --good: #16a34a;
+      --warn: #f59e0b;
+      --bad: #dc2626;
+      --border: #e5e7eb;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Ubuntu, Arial, "Noto Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      padding: 16px 20px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    select, input[type="number"], input[type="range"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      box-sizing: border-box;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .row3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .slider {
+      display: grid;
+      grid-template-columns: 1fr 80px;
+      gap: 10px;
+      align-items: center;
+    }
+    .btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 10px 14px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--accent);
+      color: white;
+      background: var(--accent);
+      cursor: pointer;
+    }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .metric {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .metric .label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .metric .value {
+      font-size: 18px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 8px;
+      text-align: right;
+    }
+    th:first-child, td:first-child { text-align: left; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin-right: 6px;
+    }
+    .ok { color: var(--good); border-color: var(--good); }
+    .warn { color: var(--warn); border-color: var(--warn); }
+    .bad { color: var(--bad); border-color: var(--bad); }
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 16px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Симулятор адаптации культур к климату Беларуси (2025–2040)</h1>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+    <div class="card" id="controls">
+      <h2>Параметры</h2>
+      <div class="row">
+        <div>
+          <label>Регион</label>
+          <select id="region">
+            <option value="BRE">Брестская область</option>
+            <option value="GRO">Гродненская область</option>
+            <option value="MIN">Минская область</option>
+            <option value="VIT">Витебская область</option>
+            <option value="MOG">Могилевская область</option>
+            <option value="GOM">Гомельская область</option>
+          </select>
+        </div>
+        <div>
+          <label>Культура</label>
+          <select id="crop">
+            <option value="rye">Рожь</option>
+            <option value="wheat">Пшеница</option>
+            <option value="flax">Лен</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Сорт</label>
+          <select id="variety">
+            <option value="baseline">Базовый</option>
+            <option value="drought">Засухоустойчивый</option>
+            <option value="disease">Устойчивый к болезням</option>
+          </select>
+        </div>
+        <div>
+          <label>Севооборот</label>
+          <select id="rotation">
+            <option value="none">Без севооборота</option>
+            <option value="basic">Базовый (с покровными)</option>
+            <option value="strong">Сильный (включая бобовые)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row3">
+        <div>
+          <label>Сроки посева (смещение дней)</label>
+          <div class="slider">
+            <input type="range" min="-30" max="30" value="0" id="sowingShift" />
+            <input type="number" id="sowingShiftNum" value="0" />
+          </div>
+        </div>
+        <div>
+          <label>Орошение (мм/год)</label>
+          <div class="slider">
+            <input type="range" min="0" max="250" value="0" id="irrigation" />
+            <input type="number" id="irrigationNum" value="0" />
+          </div>
+        </div>
+        <div>
+          <label>Дренаж (мм/год)</label>
+          <div class="slider">
+            <input type="range" min="0" max="250" value="0" id="drainage" />
+            <input type="number" id="drainageNum" value="0" />
+          </div>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button id="simulateBtn">Симулировать 2025–2040</button>
+        <button class="secondary" id="resetBtn">Сброс</button>
+      </div>
+
+      <p class="note">Подсказка: на юго-западе (Брест, Гродно) целесообразно орошение; на севере (Витебск) — дренаж. Севооборот снижает болезни, смещение посева помогает уйти от жары.</p>
+    </div>
+
+    <!-- РЕЗУЛЬТАТЫ -->
+    <div class="card">
+      <h2>Итоги и риски</h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="label">Средняя урожайность</div>
+          <div class="value" id="avgYield">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Доход (условные ед.)</div>
+          <div class="value" id="income">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Композитный риск</div>
+          <div class="value" id="risk">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Здоровье почвы</div>
+          <div class="value" id="soil">—</div>
+        </div>
+      </div>
+
+      <div id="badges" style="margin-top:10px;">
+        <span class="badge" id="badgeDrought">Засуха</span>
+        <span class="badge" id="badgeWaterlog">Переувлажнение</span>
+        <span class="badge" id="badgeHeat">Экстр. жара</span>
+        <span class="badge" id="badgeDisease">Болезни</span>
+      </div>
+
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th>Год</th>
+            <th>t̄ (°C)</th>
+            <th>P (мм)</th>
+            <th>Урожайность</th>
+            <th>Засуха</th>
+            <th>Переувлажнение</th>
+            <th>Жара</th>
+            <th>Болезни</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <p class="note">Модель упрощена для учебных целей: используемые формулы — эвристики, основанные на температурной и водной пригодности, экстремальных событиях и болезнях.</p>
+    </div>
+  </div>
+</div>
+
+<footer>© 2025 Учебный симулятор. Простая локальная HTML-страница, без внешних библиотек.</footer>
+
+<script>
+/* ====== ДАННЫЕ ====== */
+// Базовые климатические параметры по регионам (с трендом до 2040)
+const regions = {
+  BRE: { name: "Брестская", tBase: 12.0, pBase: 580, tTrend: 0.12, pTrend: -1.0 }, // теплеет, чуть суше
+  GRO: { name: "Гродненская", tBase: 11.8, pBase: 600, tTrend: 0.11, pTrend: -0.5 },
+  MIN: { name: "Минская",    tBase: 11.0, pBase: 620, tTrend: 0.10, pTrend: 0.3 },
+  VIT: { name: "Витебская",  tBase: 10.5, pBase: 660, tTrend: 0.09, pTrend: 1.0 }, // теплеет, влажнее
+  MOG: { name: "Могилевская",tBase: 10.8, pBase: 640, tTrend: 0.10, pTrend: 0.5 },
+  GOM: { name: "Гомельская", tBase: 11.6, pBase: 610, tTrend: 0.11, pTrend: -0.2 }
+};
+
+// Культуры и их параметры
+const crops = {
+  rye:   { name: "Рожь",   yieldPot: 100, tOpt: 10.5, sigmaT: 3.0, pOpt: 600, sigmaP: 120, suscept: { disease: 0.6, heat: 0.3, waterlog: 0.5 }, price: 1.0 },
+  wheat: { name: "Пшеница",yieldPot: 120, tOpt: 12.0, sigmaT: 2.5, pOpt: 620, sigmaP: 100, suscept: { disease: 0.7, heat: 0.6, waterlog: 0.6 }, price: 1.2 },
+  flax:  { name: "Лен",    yieldPot: 90,  tOpt: 11.0, sigmaT: 2.0, pOpt: 650, sigmaP: 90,  suscept: { disease: 0.8, heat: 0.7, waterlog: 0.7 }, price: 1.4 }
+};
+
+// Влияние сорта
+const varietyMods = {
+  baseline: { drought: 0, disease: 0 },
+  drought:  { drought: -0.4, disease: 0 },
+  disease:  { drought: 0, disease: -0.5 }
+};
+
+// Эффекты севооборота
+const rotationMods = {
+  none:   { diseaseMult: 1.0, soilBonus: 0 },
+  basic:  { diseaseMult: 0.75, soilBonus: 0.5 },
+  strong: { diseaseMult: 0.55, soilBonus: 1.0 }
+};
+
+// Стоимость практик (условные единицы)
+function costOfPractices(irrigation, drainage, rotation, variety) {
+  const baseIrr = irrigation * 0.08;
+  const baseDr  = drainage * 0.06;
+  const rotCost = rotation === "basic" ? 8 : rotation === "strong" ? 16 : 0;
+  const varCost = variety === "baseline" ? 0 : 10;
+  return Math.round((baseIrr + baseDr + rotCost + varCost) * 10) / 10;
+}
+
+/* ====== УТИЛИТЫ ====== */
+function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+function gaussSuitability(x, opt, sigma) {
+  const z = (x - opt) / sigma;
+  return Math.exp(-(z*z));
+}
+function rnd(min, max) { return Math.random() * (max - min) + min; }
+
+/* ====== КЛИМАТ ПО ГОДАМ ====== */
+function climateFor(regionKey, year) {
+  const r = regions[regionKey];
+  const yOffset = year - 2025;
+  const tMean = r.tBase + r.tTrend * yOffset + rnd(-0.4, 0.4); // межгодовая вариация
+  const pAnnual = r.pBase + r.pTrend * yOffset + rnd(-25, 25);
+  const tMax = tMean + rnd(18, 24); // летний максимум
+  const seasonality = rnd(0.35, 0.5); // условный индекс сезонности осадков
+  return { tMean, pAnnual, tMax, seasonality };
+}
+
+/* ====== ЭКСТРЕМАЛЬНЫЕ СОБЫТИЯ ====== */
+function generateExtremes(C, sowingShift, regionKey) {
+  // Вероятности растут со временем и с температурой
+  const heatProb = clamp((C.tMean - 11) * 0.06 + 0.15, 0.05, 0.6);
+  const droughtProb = clamp((600 - C.pAnnual) * 0.0009 + 0.15, 0.05, 0.6);
+  const waterlogProb = clamp((C.pAnnual - 640) * 0.001 + 0.10, 0.05, 0.6);
+
+  // Сдвиг посева может помочь уйти от ударов жары/ливней
+  const shiftProtect = clamp(Math.abs(sowingShift) / 30, 0, 0.3);
+
+  const heatwave = Math.random() < (heatProb * (1 - shiftProtect));
+  const drought = Math.random() < (droughtProb);
+  const waterlog = Math.random() < (waterlogProb * (1 - shiftProtect/2));
+
+  const heatwaveIndex = heatwave ? rnd(0.2, 0.6) : 0;
+  const droughtIndex  = drought  ? rnd(0.2, 0.7) : 0;
+  const waterlogIndex = waterlog ? rnd(0.2, 0.6) : 0;
+
+  return { heatwaveIndex, droughtIndex, waterlogIndex };
+}
+
+/* ====== БОЛЕЗНИ ====== */
+function diseaseRisk(C, crop, P_eff, rotation, variety) {
+  const humidDays = clamp((P_eff - 600) / 5 + 50, 20, 120); // условный показатель
+  const base = crop.suscept.disease * (humidDays / 100);
+  const rotMult = rotationMods[rotation].diseaseMult;
+  const varietyDamp = 1 + (varietyMods[variety].disease || 0); // отрицательное снижает риск
+  const risk = clamp(base * rotMult * varietyDamp, 0, 1);
+  return risk;
+}
+
+/* ====== СИМУЛЯЦИЯ ГОДА ====== */
+function simulateYear(cropKey, regionKey, year, params) {
+  const crop = crops[cropKey];
+  const C = climateFor(regionKey, year);
+
+  const irrigation = params.irrigation;
+  const drainage  = params.drainage;
+  const sowingShift = params.sowingShift;
+  const rotation = params.rotation;
+  const variety  = params.variety;
+
+  const P_eff = C.pAnnual + irrigation - drainage;
+
+  const S_T = gaussSuitability(C.tMean, crop.tOpt, crop.sigmaT);
+  const S_P = gaussSuitability(P_eff, crop.pOpt, crop.sigmaP);
+
+  const extremes = generateExtremes(C, sowingShift, regionKey);
+
+  // Наказания за экстремумы зависят от культуры и практик
+  const heatPenalty = extremes.heatwaveIndex * crop.suscept.heat * (variety === "baseline" ? 1 : 0.7);
+  const droughtPenalty = extremes.droughtIndex * (1 - clamp(irrigation / 250, 0, 0.6));
+  const waterlogPenalty = extremes.waterlogIndex * crop.suscept.waterlog * (1 - clamp(drainage / 250, 0, 0.7));
+
+  const penaltyExtreme = clamp(heatPenalty + droughtPenalty + waterlogPenalty, 0, 0.7);
+
+  const disease = diseaseRisk(C, crop, P_eff, rotation, variety);
+  const diseasePenalty = clamp(disease * 0.25, 0, 0.35);
+
+  // Итоговая урожайность
+  const yieldFinal = crop.yieldPot * S_T * S_P * (1 - penaltyExtreme) * (1 - diseasePenalty);
+  const price = crop.price;
+  const costs = costOfPractices(irrigation, drainage, rotation, variety);
+  const income = yieldFinal * price - costs;
+
+  // Почва: бонус от севооборота, штрафы за экстремумы
+  let soil = 50 + rotationMods[rotation].soilBonus * 4 - (penaltyExtreme * 12) + clamp((S_P - 0.8) * 10, -5, 5);
+  soil = clamp(Math.round(soil), 0, 100);
+
+  return {
+    year,
+    climate: C,
+    yield: Math.round(yieldFinal * 10) / 10,
+    income: Math.round(income * 10) / 10,
+    risks: {
+      drought: Math.round(extremes.droughtIndex * 100),
+      waterlog: Math.round(extremes.waterlogIndex * 100),
+      heat: Math.round(extremes.heatwaveIndex * 100),
+      disease: Math.round(disease * 100)
+    },
+    soil
+  };
+}
+
+/* ====== UI ЛОГИКА ====== */
+const el = {
+  region: document.getElementById("region"),
+  crop: document.getElementById("crop"),
+  variety: document.getElementById("variety"),
+  rotation: document.getElementById("rotation"),
+  sowingShift: document.getElementById("sowingShift"),
+  sowingShiftNum: document.getElementById("sowingShiftNum"),
+  irrigation: document.getElementById("irrigation"),
+  irrigationNum: document.getElementById("irrigationNum"),
+  drainage: document.getElementById("drainage"),
+  drainageNum: document.getElementById("drainageNum"),
+  simulateBtn: document.getElementById("simulateBtn"),
+  resetBtn: document.getElementById("resetBtn"),
+  avgYield: document.getElementById("avgYield"),
+  income: document.getElementById("income"),
+  risk: document.getElementById("risk"),
+  soil: document.getElementById("soil"),
+  tableBody: document.querySelector("#resultsTable tbody"),
+  badgeDrought: document.getElementById("badgeDrought"),
+  badgeWaterlog: document.getElementById("badgeWaterlog"),
+  badgeHeat: document.getElementById("badgeHeat"),
+  badgeDisease: document.getElementById("badgeDisease")
+};
+
+// Синхронизация слайдеров и чисел
+function bindSlider(slider, number) {
+  slider.addEventListener("input", () => number.value = slider.value);
+  number.addEventListener("input", () => slider.value = number.value);
+}
+bindSlider(el.sowingShift, el.sowingShiftNum);
+bindSlider(el.irrigation, el.irrigationNum);
+bindSlider(el.drainage, el.drainageNum);
+
+function riskBadge(elBadge, value) {
+  elBadge.classList.remove("ok", "warn", "bad");
+  const v = value;
+  if (v <= 20) elBadge.classList.add("ok");
+  else if (v <= 45) elBadge.classList.add("warn");
+  else elBadge.classList.add("bad");
+  elBadge.textContent = `${elBadge.textContent.split(' ')[0]} ${v}%`;
+}
+
+function simulateAll() {
+  const regionKey = el.region.value;
+  const cropKey = el.crop.value;
+  const params = {
+    variety: el.variety.value,
+    rotation: el.rotation.value,
+    sowingShift: parseInt(el.sowingShift.value, 10),
+    irrigation: parseInt(el.irrigation.value, 10),
+    drainage: parseInt(el.drainage.value, 10)
+  };
+
+  const rows = [];
+  for (let year = 2025; year <= 2040; year++) {
+    rows.push(simulateYear(cropKey, regionKey, year, params));
+  }
+
+  // Заполнить таблицу
+  el.tableBody.innerHTML = "";
+  let sumYield = 0, sumIncome = 0, sumRisk = 0, sumSoil = 0;
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.year}</td>
+      <td>${r.climate.tMean.toFixed(1)}</td>
+      <td>${Math.round(r.climate.pAnnual)}</td>
+      <td>${r.yield}</td>
+      <td>${r.risks.drought}%</td>
+      <td>${r.risks.waterlog}%</td>
+      <td>${r.risks.heat}%</td>
+      <td>${r.risks.disease}%</td>
+    `;
+    el.tableBody.appendChild(tr);
+
+    sumYield += r.yield;
+    sumIncome += r.income;
+    sumRisk += (r.risks.drought + r.risks.waterlog + r.risks.heat + r.risks.disease) / 4;
+    sumSoil += r.soil;
+  });
+
+  const n = rows.length;
+  const avgYield = Math.round((sumYield / n) * 10) / 10;
+  const avgIncome = Math.round((sumIncome / n) * 10) / 10;
+  const avgRisk = Math.round(sumRisk / n);
+  const avgSoil = Math.round(sumSoil / n);
+
+  el.avgYield.textContent = `${avgYield}`;
+  el.income.textContent = `${avgIncome}`;
+  el.risk.textContent = `${avgRisk}%`;
+  el.soil.textContent = `${avgSoil}`;
+
+  // Бейджи рисков по среднему значению последнего года (для ощущения "здесь и сейчас")
+  const last = rows[rows.length - 1];
+  riskBadge(el.badgeDrought, last.risks.drought);
+  riskBadge(el.badgeWaterlog, last.risks.waterlog);
+  riskBadge(el.badgeHeat, last.risks.heat);
+  riskBadge(el.badgeDisease, last.risks.disease);
+}
+
+function resetAll() {
+  el.region.value = "BRE";
+  el.crop.value = "rye";
+  el.variety.value = "baseline";
+  el.rotation.value = "none";
+  el.sowingShift.value = 0; el.sowingShiftNum.value = 0;
+  el.irrigation.value = 0; el.irrigationNum.value = 0;
+  el.drainage.value = 0; el.drainageNum.value = 0;
+  el.tableBody.innerHTML = "";
+  el.avgYield.textContent = "—";
+  el.income.textContent = "—";
+  el.risk.textContent = "—";
+  el.soil.textContent = "—";
+  ["badgeDrought","badgeWaterlog","badgeHeat","badgeDisease"].forEach(id => {
+    const b = document.getElementById(id);
+    b.classList.remove("ok","warn","bad");
+    b.textContent = b.textContent.split(' ')[0];
+  });
+}
+
+el.simulateBtn.addEventListener("click", simulateAll);
+el.resetBtn.addEventListener("click", resetAll);
+
+// Автозапуск на стартовых параметрах
+simulateAll();
+</script>
+</body>
+</html>
